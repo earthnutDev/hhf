@@ -1,69 +1,53 @@
 {
-  "name": "ihot",
+  "name": "hhf",
   "type": "module",
-  "version": "0.0.2",
-  "main": "exportCjs/index.cjs",
-  "module": "exportMjs/index.mjs",
-  "typings": "exportTypes/index.d.ts",
-  "description": "a simple hot restart",
+  "version": "0.1.0",
+  "private": true,
+  "description": "一个简单的热启动",
   "scripts": {
-    "build": "npx ixxx rm  exportCjs exportMjs exportTypes && npm run b",
-    "b": "rollup --config rollup.config.js && tsc -p tsconfig.types.json",
-    "clean": "npx ixxx pkg -u rm node_modules run npm install run build ",
-    "prettier": "npx prettier . --write",
-    "test": "npm run b  && echo 'start ihot' && npx ihot",
-    "up": "npx ixxx up -n"
+    "build": "jja rm dist && pnpm run b && pnpm run clean:package",
+    "b": "rollup --config rollup.config.js",
+    "clean:package": "node ./scripts/clean-package-json.js",
+    "diff": "jja package --diff=淘宝",
+    "push": "gvv",
+    "push:version": "gvv",
+    "prettier": "prettier . --write",
+    "dev": "jja clear && pnpm build && hhf_dev=all node ./dist/bin.mjs"
   },
-  "files": [
-    "exportBin",
-    "exportCjs",
-    "exportMjs",
-    "exportTypes"
-  ],
-  "engines": {
-    "node": "^18.0.0 ||  >=20.0.0"
-  },
-  "author": "lmssee <lmssee@outlook.com>  (https://lmssee.com)",
-  "license": "ISC",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/lmssee/ihot.git"
-  },
-  "keywords": [
-    "letmiseesee",
-    "lmssee",
-    "is-mi",
-    "ismi",
-    "hot",
-    "ihot"
-  ],
-  "homepage": "https://lmssee.github.io/ihot",
-  "bugs": {
-    "url": "https://github.com/lmssee/ihot/issues",
-    "email": "lmssee@outlook.com"
-  },
-  "publishConfig": {
-    "access": "public",
-    "registry": "https://registry.npmjs.org/"
-  },
+  "license": "MIT",
   "dependencies": {
-    "ismi-command": "^0.0.7",
-    "ismi-js-tools": "^0.0.2",
-    "ismi-node-tools": "^0.0.6",
-    "tslib": "^2.6.3"
+    "@qqi/log": "^0.1.1",
+    "a-command": "^2.3.13",
+    "a-js-tools": "^1.0.10",
+    "a-node-tools": "^4.2.19",
+    "a-type-of-js": "^1.0.7",
+    "color-pen": "^2.0.13",
+    "qqi": "^0.1.2"
   },
   "devDependencies": {
-    "@rollup/plugin-commonjs": "^25.0.8",
+    "@eslint/js": "^9.32.0",
+    "@qqi/check-version": "^1.0.5",
+    "@qqi/dev": "^0.1.1",
+    "@qqi/rollup-external": "^1.0.10",
+    "@rollup/plugin-commonjs": "^28.0.6",
     "@rollup/plugin-json": "^6.1.0",
-    "@rollup/plugin-node-resolve": "^15.2.3",
+    "@rollup/plugin-node-resolve": "^16.0.1",
     "@rollup/plugin-terser": "^0.4.4",
-    "@rollup/plugin-typescript": "^11.1.6",
-    "@types/node": "^20.14.2",
-    "prettier": "^3.3.2",
+    "@rollup/plugin-typescript": "^12.1.4",
+    "@types/node": "^24.1.0",
+    "eslint": "^9.32.0",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-jsdoc": "^52.0.1",
+    "globals": "^16.3.0",
+    "gvv": "^0.1.6",
+    "jja": "^2.3.16",
+    "pjj": "^1.0.4",
+    "prettier": "^3.6.2",
     "rollup-plugin-cleanup": "^3.2.1",
-    "typescript": "^5.4.5"
-  },
-  "bin": {
-    "ihot": "./exportBin/index.js"
+    "rollup-plugin-copy": "^3.5.0",
+    "tslib": "^2.8.1",
+    "typescript": "^5.8.3",
+    "typescript-eslint": "^8.38.0",
+    "vjj": "^1.0.10"
   }
 }

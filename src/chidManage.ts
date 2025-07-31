@@ -1,46 +1,42 @@
 import { spawn } from 'node:child_process';
-import hotData from './hotData';
-import { createInterface } from 'node:readline/promises';
-import { fileExist, Color } from 'ismi-node-tools';
-const { stdin, stdout, stderr } = process;
+import { hotData } from './data-store';
+import { _p, fileExist } from 'a-node-tools';
+import { bluePen, yellowPen } from 'color-pen';
+import { dog } from './aided/dog';
+import { resolve } from 'node:path';
+const { stdin, stdout } = process;
 
 /** 杀死那个进程 */
 export async function killChild() {
-  return new Promise<void>((resolve, reject) => {
+  return new Promise<boolean>(resolve => {
+    dog('清理子进程数据');
     // 清理父传子消息
     stdin.removeListener('data', parentToChild);
     // 清理子传父
-    hotData.childProcess &&
-      hotData.childProcess.stdout &&
-      hotData.childProcess.stdout.removeListener('data', childToParent);
+    hotData?.childProcess?.stdout?.removeListener('data', childToParent);
     // 倘若有子程序 id
     if (hotData.childProcess && hotData.childProcess.pid) {
       const id: number = hotData.childProcess.pid;
+      dog('将杀死的子进程的 id', id);
       /// 软关闭
-      // hotData.childProcess.kill('SIGTERM');
-      process.kill(id, 'SIGTERM');
-      console.log(`kill  one on ${new Date().toTimeString()} `);
+      hotData.childProcess.kill('SIGTERM');
+      // process.kill(id, 'SIGTERM');
+      _p(`杀死进程 ${new Date().toTimeString()} `);
       setTimeout(() => {
-        // process.kill(id, 'SIGKILL');
-        // process.kill(id, 'SIGKILL');
-        // process.kill(id, 'SIGKILL');
-        // process.kill(id, 'SIGKILL');
-        // process.kill(id, 'SIGKILL');
-        // process.kill(id, 'SIGKILL');
-        // hotData.childProcess.kill('SIGKILL');
-        console.log(`kill  two  on ${new Date().toTimeString()} `);
+        _p(`二次杀死子进程 ${new Date().toTimeString()} `);
         setTimeout(() => {
           /// 最后通牒
           // process.kill(id, 'SIGKILL');
-          // hotData.childProcess.kill('SIGKILL');
-          resolve();
+          hotData.childProcess.kill('SIGKILL');
+          resolve(true);
         }, 1200);
       }, 4000);
       hotData.childProcess.on('exit', (code, signal) => {
-        console.log(`i am die in ${new Date().toTimeString()} `);
+        dog('退出', code, signal);
+        _p(`子进程退出 ${new Date().toTimeString()} `);
       });
     } else {
-      resolve();
+      resolve(false);
     }
   });
 }
@@ -48,14 +44,17 @@ export async function killChild() {
 /** 创建子程序 */
 export async function createChild() {
   let cwd = hotData.options.cwd;
+  dog('构建新的子进程', cwd);
+  dog('构建前参数为', hotData.options);
   const cwdExit = fileExist(cwd);
   if (!cwdExit || !cwdExit.isDirectory()) {
-    return console.log(
-      Color.darkBlue(`配置中 cwd（目录） :  ${Color.darkYellow(cwd)} 不存在`),
-    );
+    dog.error('没有找到指定的文件目录');
+    return _p(bluePen(`配置中 cwd（目录） :  ${yellowPen(cwd)} 不存在`));
   }
 
-  // cwd = pathJoin(process.cwd(), cwd);
+  cwd = resolve(process.cwd(), cwd);
+
+  dog('构建玩成的目录为', cwd);
   try {
     hotData.childProcess = spawn(
       (hotData.options.code as string) || hotData.ls,
@@ -70,7 +69,8 @@ export async function createChild() {
     hotData.childProcess.stdout.on('data', childToParent);
     stdin.on('data', parentToChild);
   } catch (error) {
-    console.log(error, '\n 创建子线程失败');
+    _p(error);
+    _p('\n 创建子线程失败');
   }
 }
 /** 子进程向父进程写入 */

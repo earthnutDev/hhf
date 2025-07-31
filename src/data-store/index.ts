@@ -1,14 +1,25 @@
-import { ChildProcess, ChildProcessWithoutNullStreams } from 'child_process';
-import { typeOf } from 'ismi-js-tools';
-import { ChildProcessByStdio } from 'node:child_process';
+import { ChildProcessWithoutNullStreams } from 'child_process';
+import { isArray, isString, typeOf } from 'a-type-of-js';
 import { FSWatcher } from 'node:fs';
+import { isWindows } from 'a-node-tools';
+import { DefineOptions } from './type';
+import { CommandParam } from 'src/aided/type';
+import { ArgsMapType } from 'a-command';
 /**
  * 初始化的参数们
  */
-let initArg: any = {};
+const initArg: DefineOptions = {
+  args: [],
+  skip: [],
+  code: '',
+  watch: [],
+  cwd: '',
+  base: '',
+  remove: false,
+  beforeRestart: {},
+};
+/**  数据  */
 class HotData {
-  /** 是否是 windows   */
-  isWindows: boolean = process.platform == 'win32';
   /** 这会是否正在更新 */
   restart: boolean = false;
 
@@ -16,17 +27,18 @@ class HotData {
    *
    * 该值的初始化在 [主文件](./hot.ts)
    */
-  get initArg(): any {
+  get initArg(): DefineOptions {
     return initArg;
   }
 
-  set initArg(v) {
+  /**  设置初始化参数  */
+  set initArg(v: ArgsMapType<CommandParam>) {
     initArgData(v);
   }
 
   /** 展示目录  */
   get ls(): string {
-    return this.isWindows ? 'dir' : 'ls';
+    return isWindows ? 'dir' : 'ls';
   }
 
   /** 计数  */
@@ -55,8 +67,6 @@ class HotData {
    */
   childProcess!: ChildProcessWithoutNullStreams;
   childList!: ChildProcessWithoutNullStreams[];
-  /** 用户启动时的参数 */
-  // args?: string[];
   /** 配置信息
    *
    *  该属性会在 [初始化配置文件](./initOptions.ts)中进行赋值
@@ -98,45 +108,38 @@ class HotData {
 }
 
 /** 初始化初始化数据 */
-function initArgData(v: any) {
+function initArgData(v: ArgsMapType<CommandParam>) {
   if (typeOf(v) != 'object') return;
-  // 配置 base
-  typeof v.base == 'string' && (initArg.base = v.base),
-    // 配置 cwd
-    typeof v.cwd == 'string' && (initArg.cwd = v.cwd),
-    // 配置 watch 数组模式
-    (typeOf(v.watch) == 'array' && (initArg.watch = v.watch)) ||
-      // 配置 watch 字符串模式
-      (typeof v.watch == 'string' && (initArg.watch = [v.watch])),
-    // 配置 code
-    typeof v.code == 'string' && (initArg.code = v.code),
-    // 配置跳过文件
-    (typeOf(v.skip) == 'string' && (v.skip = [v.skip]), 0) ||
-      (typeOf(v.skip) == 'array' &&
-        (initArg.skip = new RegExp(v.skip.join('|').replace(/\./gm, '\\.')))),
-    // 配置其余参数
-    (typeof v.args == 'string' && (v.args = [v.args]), 0) ||
-      (typeOf(v.args) == 'array' && (initArg.args = v.args));
+
+  if (isString(v.base)) {
+    initArg.base = v.base;
+  }
+  if (isString(v.cwd)) {
+    initArg.cwd = v.cwd;
+  }
+  if (isArray(v.watch)) {
+    initArg.watch = v.watch;
+  }
+  if (isString(v.watch)) {
+    initArg.watch = [v.watch];
+  }
+  if (isString(v.code)) {
+    initArg.code = v.code;
+  }
+  if (isString(v.skip)) {
+    v.skip = [v.skip];
+  }
+  if (isArray(v.skip)) {
+    initArg.skip = [...v.skip];
+  }
+
+  if (isString(v.args)) {
+    v.args = [v.args];
+  }
+
+  if (isArray(v.args)) {
+    initArg.args = [...v.args];
+  }
 }
 
-/** 热重启配置 */
-export interface DefineOptions {
-  /**  监听文件的相对目录  */
-  base: string;
-  /**  执行的相对位置  */
-  cwd: string;
-  /** 热重启监听文件 */
-  watch: string[];
-  /** 跳过不监听的文件夹 */
-  skip: RegExp;
-  /**  执行的 code 码，要被热启动的原命令 */
-  code: string | null | undefined;
-  /** 配置热更新启动参数 */
-  args: any[];
-  /** 移除旧的打包文件 */
-  remove: Boolean;
-  /** 热启动前需要执行的操作  */
-  beforeRestart: {};
-}
-
-export default new HotData();
+export const hotData = new HotData();
