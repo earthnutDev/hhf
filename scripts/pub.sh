@@ -13,6 +13,7 @@ install_check_version() {
 
 tag=""
 # npx 在某种程度上还是要比 pnpm 更靠谱呀
+install_check_version
 if ! tag=$("npx ${CHECK_VERSION}" c=. 2>&1); then
     echo "未通过版本校验：$tag"
     exit 0
